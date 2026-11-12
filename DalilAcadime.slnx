@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="DalilAcadime.API/DalilAcadime.API.csproj" />
+  <Project Path="DalilAcadime.Core/DalilAcadime.Core.csproj" Id="b3d8ce94-3b6f-43d6-aaf2-4caf0ae2673d" />
+  <Project Path="DalilAcadime.InfraStructures/DalilAcadime.InfraStructures.csproj" Id="741e1129-6ffd-4e2a-94a2-dbb0e84a1a2f" />
+</Solution>
