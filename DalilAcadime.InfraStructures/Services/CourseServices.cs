@@ -28,6 +28,12 @@ namespace DalilAcadime.InfraStructures.Services
                 throw new NotFoundException($"Course with ID {id} not found");
             return course?.ToCourseResponseDto();
         }
+
+        public Task<List<StudentResponseDto>> GetPaidStudents(int courseId)
+        {
+            return courseRepository.GetPaidStudents(courseId);
+        }
+
         public  async Task<CourseResponseDto> CreateCourse(CreateCourseDto dto) {
            
             await createValidator.ValidateAndThrowAsync(dto);

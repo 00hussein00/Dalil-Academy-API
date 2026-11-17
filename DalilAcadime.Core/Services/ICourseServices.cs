@@ -11,6 +11,7 @@ namespace DalilAcadime.Core.Services
         Task<PageResult<CourseResponseDto>> GetCoursesPagenation(int page, int pageSize,double minPrice, double maxPrice);
         Task<int> CountCourses();
         Task<CourseResponseDto?> GetCourseById(int id);
+        Task<List<StudentResponseDto>> GetPaidStudents(int courseId);
         Task<CourseResponseDto> CreateCourse(CreateCourseDto dto);
 
         Task<CourseResponseDto?> UpdateCourse(int id, UpdateCourseDto updatedCourse);

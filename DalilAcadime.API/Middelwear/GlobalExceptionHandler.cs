@@ -18,6 +18,8 @@ HttpContext context, Exception exception, CancellationToken ct)
             NotFoundException => (404, "Resource not found"),
             ConflictException => (409, "Conflict"),
             InvalidFileFormatException => (400, "Invalid file format"),
+            PaymentFailedException => (StatusCodes.Status400BadRequest, exception.Message),
+            HttpRequestException => (StatusCodes.Status503ServiceUnavailable, "PayPal service is currently unavailable"),
             _ => (500, "An unexpected error occurred")
         };
         if (status == 500) logger.LogError(exception, "Unhandled exception");

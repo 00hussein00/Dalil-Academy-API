@@ -25,6 +25,9 @@ namespace DalilAcadime.InfraStructures.Data.Configration
             builder.Property(e => e.EnrollmentAt)
                    .HasDefaultValueSql("now()");
 
+            builder.Property(e => e.Status)
+                   .HasConversion<string>();
+
         }
     }
 }

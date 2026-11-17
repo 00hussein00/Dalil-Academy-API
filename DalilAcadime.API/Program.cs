@@ -1,9 +1,11 @@
+using DalilAcadime.Core.Payments;
 using DalilAcadime.Core.Repository;
 using DalilAcadime.Core.Security;
 using DalilAcadime.Core.Services;
 using DalilAcadime.Core.Storage;
 using DalilAcadime.Core.Validetors;
 using DalilAcadime.InfraStructures.Data;
+using DalilAcadime.InfraStructures.Payments;
 using DalilAcadime.InfraStructures.Repository;
 using DalilAcadime.InfraStructures.Security;
 using DalilAcadime.InfraStructures.Services;
@@ -23,6 +25,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer(); 
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new()
@@ -62,11 +65,17 @@ builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
 builder.Services.AddSingleton<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthServices, AuthService>();
 builder.Services.AddSingleton<IImageService, ImgService>();
+
+var paypalOptions = builder.Configuration.GetSection("PayPal").Get<PayPalOptions>() ?? new PayPalOptions();
+builder.Services.AddSingleton(paypalOptions);
+builder.Services.AddHttpClient<IPaymentGateway, PayPalPaymentGateway>(client =>
+    client.BaseAddress = new Uri(paypalOptions.BaseUrl));
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCourseDtoValidators>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateStudentDtoValidator>();

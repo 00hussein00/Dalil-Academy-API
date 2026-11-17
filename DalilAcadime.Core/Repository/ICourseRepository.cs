@@ -12,6 +12,7 @@ namespace DalilAcadime.Core.Repository
         Task<int> CountCourses();
 
         Task<Course?> GetCourseById(int id);
+        Task<List<StudentResponseDto>> GetPaidStudents(int courseId);
         Task<Course> CreateCourse(Course course);
 
         Task<Course?> UpdateCourse(Course updatedCourse);

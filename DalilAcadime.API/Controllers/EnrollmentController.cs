@@ -10,7 +10,9 @@ namespace DalilAcadime.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class EnrollmentController(IEnrollmentService enrollmentService) : ControllerBase
+    public class EnrollmentController(
+        IEnrollmentService enrollmentService,
+        IPaymentService paymentService) : ControllerBase
     {
         [HttpGet("me")]
         [Authorize(Roles = UserRoles.Student)]
@@ -46,6 +48,20 @@ namespace DalilAcadime.API.Controllers
         {
             var created = await enrollmentService.Create(dto);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+
+        [HttpPost("{id:int}/pay")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<ActionResult<PayPaymentResponseDto>> Pay(int id)
+        {
+            return Ok(await paymentService.PayAsync(id));
+        }
+
+        [HttpPost("{id:int}/capture")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<ActionResult<EnrollmentResponseDto>> Capture(int id)
+        {
+            return Ok(await paymentService.CaptureAsync(id));
         }
 
         [HttpPut("{id:int}")]

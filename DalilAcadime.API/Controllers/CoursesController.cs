@@ -31,6 +31,13 @@ namespace DalilAcadime.API.Controllers
             return Ok(await courseService.GetCourseById(id));
         }
 
+        [HttpGet("{courseId:int}/students")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<ActionResult<List<StudentResponseDto>>> GetPaidStudents(int courseId)
+        {
+            return Ok(await courseService.GetPaidStudents(courseId));
+        }
+
         // for task 7 
         [HttpGet("Count")]
         [AllowAnonymous]

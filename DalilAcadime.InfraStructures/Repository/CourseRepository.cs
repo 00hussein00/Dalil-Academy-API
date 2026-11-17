@@ -31,6 +31,25 @@ namespace DalilAcadime.InfraStructures.Repository
         {
             return await db.Courses.Include(c => c.Instructor).FirstOrDefaultAsync(c => c.Id == id);
         }
+
+        public async Task<List<StudentResponseDto>> GetPaidStudents(int courseId)
+        {
+            if (!await db.Courses.AnyAsync(course => course.Id == courseId))
+            {
+                throw new NotFoundException($"Course with ID {courseId} not found");
+            }
+
+            return await db.Enrollments
+                .Where(enrollment =>
+                    enrollment.CourseId == courseId &&
+                    enrollment.Status == Enrollment.EnrollmentStatus.Paid)
+                .Select(enrollment => new StudentResponseDto(
+                    enrollment.Student!.Id,
+                    enrollment.Student.FullName,
+                    enrollment.Student.Email))
+                .ToListAsync();
+        }
+
         public async Task<Course> CreateCourse(Course course)
         {
             try

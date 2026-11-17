@@ -9,4 +9,5 @@ namespace DalilAcadime.Core.Exceptions
     public class UnauthorizedException(string msg) : Exception(msg);
     public class ForbiddenException(string msg) : Exception(msg);
     public class InvalidFileFormatException(string msg) : Exception(msg);
+    public class PaymentFailedException(string msg) : Exception(msg) { }
 }

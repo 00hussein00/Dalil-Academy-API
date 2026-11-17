@@ -13,7 +13,9 @@ namespace DalilAcadime.InfraStructures.Repository
         public async Task<List<CourseResponseDto>> GetStudentCoursesByUserId(int userId)
         {
             return await db.Courses
-                .Where(course => course.Enrollments.Any(enrollment => enrollment.Student!.UserId == userId))
+                .Where(course => course.Enrollments.Any(enrollment =>
+                    enrollment.Student!.UserId == userId &&
+                    enrollment.Status == Enrollment.EnrollmentStatus.Paid))
                 .Select(course => new CourseResponseDto(
                     course.Id,
                     course.Title,
@@ -33,6 +35,7 @@ namespace DalilAcadime.InfraStructures.Repository
                     enrollment.Id,
                     enrollment.StudentId,
                     enrollment.CourseId,
+                    enrollment.Status,
                     enrollment.EnrollmentAt))
                 .ToListAsync();
         }
@@ -45,14 +48,20 @@ namespace DalilAcadime.InfraStructures.Repository
                     enrollment.Id,
                     enrollment.StudentId,
                     enrollment.CourseId,
+                    enrollment.Status,
                     enrollment.EnrollmentAt))
                 .FirstOrDefaultAsync();
         }
 
         public async Task<EnrollmentResponseDto> Create(Enrollment enrollment)
         {
-            await EnsureReferencesExist(enrollment.StudentId, enrollment.CourseId);
+            var course = await EnsureReferencesExist(enrollment.StudentId, enrollment.CourseId);
             await EnsureEnrollmentDoesNotExist(enrollment.StudentId, enrollment.CourseId);
+
+            if (course.Price == 0f)
+            {
+                enrollment.Status = Enrollment.EnrollmentStatus.Paid;
+            }
 
             try
             {
@@ -72,6 +81,11 @@ namespace DalilAcadime.InfraStructures.Repository
             if (enrollment is null)
             {
                 return null;
+            }
+
+            if (enrollment.Status == Enrollment.EnrollmentStatus.Paid && enrollment.CourseId != courseId)
+            {
+                throw new ConflictException("A paid enrollment cannot be moved to another course.");
             }
 
             await EnsureReferencesExist(studentId, courseId);
@@ -108,23 +122,31 @@ namespace DalilAcadime.InfraStructures.Repository
                 return null;
             }
 
+            if (enrollment.Status == Enrollment.EnrollmentStatus.Paid)
+            {
+                throw new ConflictException("A paid enrollment cannot be deleted.");
+            }
+
             var response = ToResponse(enrollment);
             db.Enrollments.Remove(enrollment);
             await db.SaveChangesAsync();
             return response;
         }
 
-        private async Task EnsureReferencesExist(int studentId, int courseId)
+        private async Task<Course> EnsureReferencesExist(int studentId, int courseId)
         {
             if (!await db.Students.AnyAsync(student => student.Id == studentId))
             {
                 throw new NotFoundException($"Student with ID {studentId} not found.");
             }
 
-            if (!await db.Courses.AnyAsync(course => course.Id == courseId))
+            var course = await db.Courses.FirstOrDefaultAsync(course => course.Id == courseId);
+            if (course is null)
             {
                 throw new NotFoundException($"Course with ID {courseId} not found.");
             }
+
+            return course;
         }
 
         private async Task EnsureEnrollmentDoesNotExist(int studentId, int courseId)
@@ -142,6 +164,7 @@ namespace DalilAcadime.InfraStructures.Repository
                 enrollment.Id,
                 enrollment.StudentId,
                 enrollment.CourseId,
+                enrollment.Status,
                 enrollment.EnrollmentAt);
         }
 
